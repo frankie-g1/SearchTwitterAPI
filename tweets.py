@@ -38,6 +38,9 @@ class Tweets(Resource):
         # for tweet in tweepy.Cursor(tapi.search, q=keywords).items(10):
         #    tweets_list.append((keywords, tweet.id, tweet.text))
 
+        '''Here is a database insert regarding only to the form's text field.
+            This is placeholder until Twitter API access.
+        '''
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
