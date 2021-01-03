@@ -3,7 +3,7 @@
 Future plans:
   Implement tweepy to return the tweets found through the submit fields keywords.
 
- [Currently:](https://imgur.com/gallery/invOBNb)
+ [Currently:](https://imgur.com/a/invOBNb)
   Without Twitter API access, the API's post method inserts the tuple (user's filters, fake tweet id 203102831123, and fake tweet text "Postman") into the sqlite3 database.
   
   
