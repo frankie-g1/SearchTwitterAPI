@@ -6,7 +6,6 @@ import tweepy
 class Tweets(Resource):
     def get(self):
         keywords = request.form['see_tweets']
-        print(keywords)
         if Tweets.find_by_name(keywords):
             return Tweets.find_by_name(keywords)
         return {'message': ' Item not found'}, 404
@@ -31,8 +30,8 @@ class Tweets(Resource):
         '''  Run through the database if these words have already been searched.
              If we wanted to always be updated, we could remove this if, and new tweets
              will always be scraped from twitter regardless of repetitive keywords. '''
-        if Tweets.find_by_name(keywords):
-            return Tweets.find_by_name(keywords)
+        #if Tweets.find_by_name(keywords):
+        #    return Tweets.find_by_name(keywords)
 
         '''Below I must find tweets with tweepy to insert into the database'''
         # tweets_list = []
