@@ -1,5 +1,8 @@
+from flask import render_template
+from flask_table import Table, Col
 from flask_restful import Resource, request
 import sqlite3
+import json
 import tweepy
 
 
@@ -20,7 +23,6 @@ class Tweets(Resource):
         result = cursor.execute(select_query, (keywords,))
         row = result.fetchall()
         connection.close()
-
         if row:
             return {'Tweets': row}
 
@@ -51,5 +53,8 @@ class Tweets(Resource):
         connection.commit()
         connection.close()
 
+        with open('templates/tweets.json', 'w') as fp:
+            json.dump(Tweets.find_by_name(keywords), fp, sort_keys=True, indent=4)
         # return {'Tweets found': tweets_list}
-        return Tweets.find_by_name(keywords)
+        return
+
