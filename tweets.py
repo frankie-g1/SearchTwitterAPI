@@ -8,9 +8,15 @@ import tweepy
 
 class Tweets(Resource):
     def get(self):
-        keywords = request.form['see_tweets']
-        if Tweets.find_by_name(keywords):
-            return Tweets.find_by_name(keywords)
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+
+        select_query = "SELECT * FROM tweets"
+        result = cursor.execute(select_query)
+        row = result.fetchall()
+        connection.close()
+        if row:
+            return result
         return {'message': ' Item not found'}, 404
 
     @classmethod
@@ -26,14 +32,30 @@ class Tweets(Resource):
         if row:
             return {'Tweets': row}
 
+    @classmethod
+    def delete_by_name(cls, keywords):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+
+        select_query = "DELETE * FROM tweets WHERE keywords=?"
+
+        result = cursor.execute(select_query, (keywords,))
+        row = result.fetchall()
+        connection.close()
+        if row:
+            return True
+
     def post(self):
         # request_data = request.get_json()
         keywords = request.form['search_tweets']
         '''  Run through the database if these words have already been searched.
-             If we wanted to always be updated, we could remove this if, and new tweets
-             will always be scraped from twitter regardless of repetitive keywords. '''
-        #if Tweets.find_by_name(keywords):
-        #    return Tweets.find_by_name(keywords)
+             To return a recent list of tweets -> remove this old tweets from past
+             user submissions and continue to use Twitter API again '''
+        #  Used to return tweets from a previous user submission, now we
+        #  perform n more SQL operations by deleting those tweets.
+        #  The extra computing time keeps the database size to a minimum
+        if Tweets.find_by_name(keywords):
+            Tweets.delete_by_name(keywords)
 
         '''Below I must find tweets with tweepy to insert into the database'''
         # tweets_list = []
@@ -47,7 +69,7 @@ class Tweets(Resource):
         cursor = connection.cursor()
 
         insert_query = "INSERT INTO tweets VALUES (?, ?, ?)"
-        cursor.execute(insert_query, (keywords, 203102831123, "Postman"))
+        cursor.execute(insert_query, (keywords, 203102831123, keywords))
         # cursor.executemany(query, tweets_list)
 
         connection.commit()
@@ -56,5 +78,5 @@ class Tweets(Resource):
         with open('templates/tweets.json', 'w') as fp:
             json.dump(Tweets.find_by_name(keywords), fp, sort_keys=True, indent=4)
         # return {'Tweets found': tweets_list}
-        return
+        return {'Tweets found': Tweets.find_by_name(keywords)}, 201
 
