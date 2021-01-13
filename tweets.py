@@ -7,6 +7,8 @@ import tweepy
 
 
 class Tweets(Resource):
+
+
     def get(self):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
@@ -37,7 +39,7 @@ class Tweets(Resource):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
-        select_query = "DELETE * FROM tweets WHERE keywords=?"
+        select_query = "DELETE FROM tweets WHERE keywords=?"
 
         result = cursor.execute(select_query, (keywords,))
         row = result.fetchall()
@@ -58,9 +60,14 @@ class Tweets(Resource):
             Tweets.delete_by_name(keywords)
 
         '''Below I must find tweets with tweepy to insert into the database'''
-        # tweets_list = []
-        # for tweet in tweepy.Cursor(tapi.search, q=keywords).items(10):
-        #    tweets_list.append((keywords, tweet.id, tweet.text))
+        auth = tweepy.AppAuthHandler(consumer_key="p7ZaeOKcUmWMCqPgoVwC9RjLt",
+                                     consumer_secret="uKsseakqpOmyhtrssQvbGPcRffi9ALrsdIjLt90YbpfE9SXklz")
+        t_api = tweepy.API(auth)
+        tweets_list = []
+        for tweet in (t_api.search_30_day("SearchTwitterAPI", keywords, [10])):
+            tweets_list.append((keywords, tweet.id, tweet.text))
+
+
 
         '''Here is a database insert regarding only to the form's text field.
             This is placeholder until Twitter API access.
@@ -69,14 +76,14 @@ class Tweets(Resource):
         cursor = connection.cursor()
 
         insert_query = "INSERT INTO tweets VALUES (?, ?, ?)"
-        cursor.execute(insert_query, (keywords, 203102831123, keywords))
-        # cursor.executemany(query, tweets_list)
+        for row in range(0, len(tweets_list)):
+            cursor.execute(insert_query, (tweets_list[row]))
 
         connection.commit()
         connection.close()
 
-        with open('templates/tweets.json', 'w') as fp:
-            json.dump(Tweets.find_by_name(keywords), fp, sort_keys=True, indent=4)
+        #with open('templates/tweets.json', 'w') as fp:
+        #    json.dump(Tweets.find_by_name(keywords), fp, sort_keys=True, indent=4)
         # return {'Tweets found': tweets_list}
         return {'Tweets found': Tweets.find_by_name(keywords)}, 201
 
